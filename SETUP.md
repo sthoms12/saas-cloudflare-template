@@ -122,4 +122,75 @@ Set these in your Cloudflare dashboard (production) and `.dev.vars` (local):
 
 ---
 
+## Alternative: Cloudflare Dashboard Setup (No CLI)
+
+### 1. Cloudflare D1 (Database)
+1. Go to the [Cloudflare Dashboard](https://dash.cloudflare.com/).
+2. Select your account and site.
+3. In the left sidebar, click **Workers & Pages** > **D1**.
+4. Click **Create Database**.
+   - Name it (e.g., `example_db`).
+5. After creation, click your database, then **Query Editor**.
+6. Copy-paste the contents of `db_schema/schema.sql` and click **Run** to create all tables.
+
+### 2. Cloudflare KV Namespaces
+1. In the sidebar, go to **Workers & Pages** > **KV**.
+2. Click **Create namespace**.
+   - Name one `login_session_cache`.
+   - Name another `rate_limit`.
+3. After creation, note the Namespace IDs.
+4. In your Worker’s **Settings** > **Variables** > **KV Namespaces**, add:
+   - `LOGIN_SESSION_CACHE` → [Namespace ID]
+   - `RATE_LIMIT` → [Namespace ID]
+
+### 3. (Optional) R2 Bucket and Queues for Error Logging
+1. Go to **R2** in the sidebar.
+   - Click **Create bucket** and name it `error-bucket`.
+2. Go to **Queues** in the sidebar.
+   - Click **Create queue** and name it `error-queue`.
+3. In your Worker’s **Settings** > **Variables**, bind these as needed.
+
+### 4. Environment Variables (Secrets)
+1. Go to your Worker’s **Settings** > **Variables** > **Environment Variables**.
+2. Add the following (use your real secrets/keys):
+   - `LOGIN_JWT_SECRET`
+   - `STRIPE_SECRET_KEY`
+   - `STRIPE_WEBHOOK_SECRET`
+   - `TURNSTILE_SECRET_KEY`
+   - `RESEND_API_KEY`
+   - (Optional) `LARK_BOT_URL`
+
+### 5. Third-Party Integrations
+
+#### Stripe
+- [Create a Stripe account](https://dashboard.stripe.com/register).
+- Get your API keys and webhook secret from the Stripe dashboard.
+- Add them as environment variables in Cloudflare.
+
+#### Resend
+- [Create a Resend account](https://resend.com/).
+- Add your domain and follow DNS instructions.
+- Get your API key and add as an environment variable.
+
+#### Turnstile
+- Go to [Cloudflare Turnstile](https://dash.cloudflare.com/?to=/:account/turnstile).
+- Add your domain, get the site key and secret key.
+- Set the site key in `src/config.js` and the secret key as an environment variable.
+
+### 6. Deploy Your Worker/Pages
+1. In the Cloudflare Dashboard, go to **Workers & Pages**.
+2. Click **Create Application** or select your existing Worker.
+3. Upload your built project (from `npm run build`) or connect your GitHub repo.
+4. In **Settings**, ensure all bindings (D1, KV, R2, Queues, Environment Variables) are set.
+5. Click **Deploy**.
+
+### 7. Final Steps
+- Update `src/config.js` with your production domain and branding.
+- Set up legal pages (privacy, terms) as needed.
+- Test all user flows (sign up, sign in, billing, etc.).
+
+**You can now run your SaaS entirely through the Cloudflare Dashboard, no CLI required!**
+
+---
+
 **You are now ready to launch your SaaS on Cloudflare!**
