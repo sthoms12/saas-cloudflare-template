@@ -119,7 +119,6 @@ The system includes FTS5 virtual tables for fast search across all content:
 - **UI Primitives**: shared components in `src/components/ui/` (Radix UI + Tailwind)
 - **Search Components**: specialized search components in `src/components/search/`
 - **Hooks**: reusable logic in `src/hooks/` (use-toast, use-mobile, etc.)
-- **Styling**: Tailwind utility classes + global styles in App.css / index.css
 - **Type Safety**: JavaScript only; optional JSDoc / PropTypes
 - **State Management**: React hooks, no external state library
 - **Data Fetching**: Direct fetch calls via cloudflareClient, no React Query/SWR
