@@ -1,6 +1,131 @@
+// --- tracestack brainstorm item functions ---
+async function tracestack_list_brainstorm(platform, session_id) {
+  const query = "SELECT * FROM brainstorm_item WHERE session_id = ?1 ORDER BY created_date ASC;";
+  try {
+    let { results } = await platform.env.DB.prepare(query).bind(session_id).all();
+    return { success: true, items: results };
+  } catch (err) {
+    return { error: true, message: err.message };
+  }
+}
+
+async function tracestack_create_brainstorm(platform, item) {
+  const now = new Date().toISOString();
+  const id = uuidv4();
+  const query = `INSERT INTO brainstorm_item (id, session_id, content, category, priority, status, created_by, created_date, updated_date) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?8);`;
+  try {
+    let res = await platform.env.DB.prepare(query)
+      .bind(
+        id,
+        item.session_id,
+        item.content,
+        item.category || 'idea',
+        item.priority || 'medium',
+        item.status || 'open',
+        item.created_by,
+        now
+      )
+      .run();
+    if (res.success) {
+      return { success: true, id };
+    } else {
+      return { error: true, message: 'Failed to create brainstorm item.' };
+    }
+  } catch (err) {
+    return { error: true, message: err.message };
+  }
+}
+
+// --- tracestack hypothesis functions ---
+async function tracestack_list_hypotheses(platform, session_id) {
+  const query = "SELECT * FROM hypothesis WHERE session_id = ?1 ORDER BY created_date ASC;";
+  try {
+    let { results } = await platform.env.DB.prepare(query).bind(session_id).all();
+    return { success: true, items: results };
+  } catch (err) {
+    return { error: true, message: err.message };
+  }
+}
+
+async function tracestack_create_hypothesis(platform, item) {
+  const now = new Date().toISOString();
+  const id = uuidv4();
+  const query = `INSERT INTO hypothesis (id, session_id, description, confidence, status, test_plan, evidence, tags, created_by, created_date, updated_date) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?10);`;
+  try {
+    let res = await platform.env.DB.prepare(query)
+      .bind(
+        id,
+        item.session_id,
+        item.description,
+        item.confidence || 'medium',
+        item.status || 'untested',
+        item.test_plan || '',
+        JSON.stringify(item.evidence || []),
+        JSON.stringify(item.tags || []),
+        item.created_by,
+        now
+      )
+      .run();
+    if (res.success) {
+      return { success: true, id };
+    } else {
+      return { error: true, message: 'Failed to create hypothesis.' };
+    }
+  } catch (err) {
+    return { error: true, message: err.message };
+  }
+}
+// --- tracestack session entry functions ---
+async function tracestack_list_entries(platform, session_id) {
+  // List all entries for a session
+  const query = "SELECT * FROM session_entry WHERE session_id = ?1 ORDER BY timestamp ASC;";
+  try {
+    let { results } = await platform.env.DB.prepare(query).bind(session_id).all();
+    return { success: true, entries: results };
+  } catch (err) {
+    return { error: true, message: err.message };
+  }
+}
+
+async function tracestack_create_entry(platform, entry) {
+  // entry: {session_id, content, entry_type, status, duration, commands_run, outcome, attachments, tags, timestamp, aerial_x, aerial_y, aerial_connections, created_by}
+  const now = new Date().toISOString();
+  const id = uuidv4();
+  const query = `INSERT INTO session_entry (id, session_id, content, entry_type, status, duration, commands_run, outcome, attachments, tags, timestamp, aerial_x, aerial_y, aerial_connections, created_by, created_date, updated_date) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?16);`;
+  try {
+    let res = await platform.env.DB.prepare(query)
+      .bind(
+        id,
+        entry.session_id,
+        entry.content,
+        entry.entry_type || 'note',
+        entry.status || 'to_try',
+        entry.duration || null,
+        JSON.stringify(entry.commands_run || []),
+        entry.outcome || '',
+        JSON.stringify(entry.attachments || []),
+        JSON.stringify(entry.tags || []),
+        entry.timestamp || now,
+        entry.aerial_x || null,
+        entry.aerial_y || null,
+        JSON.stringify(entry.aerial_connections || []),
+        entry.created_by,
+        now
+      )
+      .run();
+    if (res.success) {
+      return { success: true, id };
+    } else {
+      return { error: true, message: 'Failed to create entry.' };
+    }
+  } catch (err) {
+    return { error: true, message: err.message };
+  }
+}
 // Cloudflare D1 Database operations
 // check the db schema in /db_schema/schema.sql
 import parser from "ua-parser-js";
+import { v4 as uuidv4 } from 'uuid';
 
 export async function db_get_user_info_by_email(platform, email) {
   const query =
@@ -557,11 +682,63 @@ export async function db_get_all_login_sessions(platform, uuid) {
   }
 }
 
+
 export async function db_get_current_login_session(platform, session_id) {
-  const query ="\
-    SELECT uuid, email, nickname, organization, stripe_customer_id, current_product_id, current_period_end_at, had_subscription_before, created_at, expire_at \
-    FROM login_session \
-    WHERE session_id = ?1;";
+  const query = "SELECT uuid, email, nickname, organization, stripe_customer_id, current_product_id, current_period_end_at, had_subscription_before, created_at, expire_at FROM login_session WHERE session_id = ?1;";
+// --- tracestack session functions ---
+async function tracestack_list_sessions(platform, created_by) {
+  // List all sessions for a user
+  const query = "SELECT * FROM session WHERE created_by = ?1 ORDER BY updated_date DESC;";
+  try {
+    let { results } = await platform.env.DB.prepare(query).bind(created_by).all();
+    return { success: true, sessions: results };
+  } catch (err) {
+    return { error: true, message: err.message };
+  }
+}
+
+async function tracestack_create_session(platform, session) {
+module.exports = {
+  // ...existing exports...
+  tracestack_list_sessions,
+  tracestack_create_session,
+  tracestack_list_entries,
+  tracestack_create_entry,
+  tracestack_list_brainstorm,
+  tracestack_create_brainstorm,
+  tracestack_list_hypotheses,
+  tracestack_create_hypothesis
+};
+  // session: {title, description, status, priority, environment, tags, error_codes, project_name, estimated_time, created_by}
+  const now = new Date().toISOString();
+  const id = uuidv4();
+  const query = `INSERT INTO session (id, title, description, status, priority, environment, tags, error_codes, project_name, estimated_time, actual_time, resolution_summary, rca_report_text, is_favorite, created_by, created_date, updated_date) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, NULL, NULL, NULL, 0, ?11, ?12, ?12);`;
+  try {
+    let res = await platform.env.DB.prepare(query)
+      .bind(
+        id,
+        session.title,
+        session.description || '',
+        session.status || 'active',
+        session.priority || 'medium',
+        JSON.stringify(session.environment || {}),
+        JSON.stringify(session.tags || []),
+        JSON.stringify(session.error_codes || []),
+        session.project_name || '',
+        session.estimated_time || null,
+        session.created_by,
+        now
+      )
+      .run();
+    if (res.success) {
+      return { success: true, id };
+    } else {
+      return { error: true, message: 'Failed to create session.' };
+    }
+  } catch (err) {
+    return { error: true, message: err.message };
+  }
+}
 
   try {
     let { results } = await platform.env.DB.prepare(query).bind(session_id).all();

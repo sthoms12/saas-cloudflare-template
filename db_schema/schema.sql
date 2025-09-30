@@ -91,3 +91,79 @@ CREATE TABLE contact_requests (
     is_replied TEXT NOT NULL DEFAULT 0,
     replied_at INTEGER
 );
+
+-- tracestack tables
+CREATE TABLE session (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT,
+    status TEXT,
+    priority TEXT,
+    environment TEXT,
+    tags TEXT,
+    error_codes TEXT,
+    project_name TEXT,
+    estimated_time REAL,
+    actual_time REAL,
+    resolution_summary TEXT,
+    rca_report_text TEXT,
+    is_favorite INTEGER,
+    created_by TEXT NOT NULL,
+    created_date TEXT NOT NULL,
+    updated_date TEXT NOT NULL
+);
+
+CREATE TABLE session_entry (
+    id TEXT PRIMARY KEY,
+    session_id TEXT NOT NULL,
+    content TEXT NOT NULL,
+    entry_type TEXT,
+    status TEXT,
+    duration REAL,
+    commands_run TEXT,
+    outcome TEXT,
+    attachments TEXT,
+    tags TEXT,
+    timestamp TEXT NOT NULL,
+    aerial_x INTEGER,
+    aerial_y INTEGER,
+    aerial_connections TEXT,
+    created_by TEXT NOT NULL,
+    created_date TEXT NOT NULL,
+    updated_date TEXT NOT NULL,
+    FOREIGN KEY (session_id) REFERENCES session (id) ON DELETE CASCADE
+);
+
+CREATE TABLE brainstorm_item (
+    id TEXT PRIMARY KEY,
+    session_id TEXT NOT NULL,
+    content TEXT NOT NULL,
+    category TEXT,
+    priority TEXT,
+    status TEXT,
+    created_by TEXT NOT NULL,
+    created_date TEXT NOT NULL,
+    updated_date TEXT NOT NULL,
+    FOREIGN KEY (session_id) REFERENCES session (id) ON DELETE CASCADE
+);
+
+CREATE TABLE hypothesis (
+    id TEXT PRIMARY KEY,
+    session_id TEXT NOT NULL,
+    description TEXT NOT NULL,
+    confidence TEXT,
+    status TEXT,
+    test_plan TEXT,
+    evidence TEXT,
+    tags TEXT,
+    created_by TEXT NOT NULL,
+    created_date TEXT NOT NULL,
+    updated_date TEXT NOT NULL,
+    FOREIGN KEY (session_id) REFERENCES session (id) ON DELETE CASCADE
+);
+
+-- FTS5 virtual tables for full-text search
+CREATE VIRTUAL TABLE sessions_fts USING fts5(title, description, tags, error_codes, project_name, resolution_summary, rca_report_text, content='session', content_rowid='id');
+CREATE VIRTUAL TABLE session_entries_fts USING fts5(content, commands_run, outcome, tags, attachments, content='session_entry', content_rowid='id');
+CREATE VIRTUAL TABLE brainstorm_items_fts USING fts5(content, category, priority, status, content='brainstorm_item', content_rowid='id');
+CREATE VIRTUAL TABLE hypotheses_fts USING fts5(description, confidence, status, test_plan, evidence, tags, content='hypothesis', content_rowid='id');
