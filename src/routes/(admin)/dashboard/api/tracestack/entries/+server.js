@@ -1,7 +1,64 @@
+import { check_rate_limit } from '../../../../../../lib/server/rate_limit.js';
+import * as db from '../../../../../../lib/server/database.js';
+
+// For demo: use a static user (replace with real auth in production)
+const DEMO_USER_EMAIL = 'demo@tracestack.local';
+
+export const GET = async ({ url, platform, request }) => {
+  if (request.method !== 'GET') {
+    return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { status: 405 });
+  }
+  // Rate limit by IP for GET requests
+  const ip = platform?.request?.headers.get('cf-connecting-ip') || 'unknown';
+  const allowed = await check_rate_limit(platform, 'tracestack-entries-get', ip, 'na');
+  if (!allowed) {
+    return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), { status: 429 });
+  }
+  // List entries for a session (session_id as query param)
+  const session_id = url.searchParams.get('session_id');
+  if (!session_id) {
+    return new Response(JSON.stringify({ error: 'Missing session_id' }), { status: 400 });
+  }
+  const result = await db.tracestack_list_entries(platform, session_id);
+  if (result.error) {
+    return new Response(JSON.stringify({ error: result.message }), { status: 500 });
+  }
+  return new Response(JSON.stringify(result.entries), { status: 200 });
+};
+
+export const POST = async ({ request, platform }) => {
+  if (request.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { status: 405 });
+  }
+  // Create entry for a session
+  let data;
+  try {
+    data = await request.json();
+  } catch {
+    return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400 });
+  }
+  if (!data || typeof data !== 'object' || !data.session_id || typeof data.content !== 'string') {
+    return new Response(JSON.stringify({ error: 'Invalid input' }), { status: 400 });
+  }
+  data.created_by = DEMO_USER_EMAIL;
+  const result = await db.tracestack_create_entry(platform, data);
+  if (result.error) {
+    return new Response(JSON.stringify({ error: result.message }), { status: 500 });
+  }
+  return new Response(JSON.stringify({ id: result.id }), { status: 201 });
+};
+
 export const PATCH = async ({ request, platform }) => {
-  // Update entry (status, entry_type, etc.)
-  const data = await request.json();
-  if (!data.id) {
+  if (request.method !== 'PATCH') {
+    return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { status: 405 });
+  }
+  let data;
+  try {
+    data = await request.json();
+  } catch {
+    return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400 });
+  }
+  if (!data || typeof data !== 'object' || !data.id) {
     return new Response(JSON.stringify({ error: 'Missing entry id' }), { status: 400 });
   }
   // Build dynamic update query for allowed fields
@@ -32,33 +89,4 @@ export const PATCH = async ({ request, platform }) => {
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
-};
-// CRUD for session entries
-import * as db from '../../../../../../lib/server/database.js';
-
-// For demo: use a static user (replace with real auth in production)
-const DEMO_USER_EMAIL = 'demo@tracestack.local';
-
-export const GET = async ({ url, platform }) => {
-  // List entries for a session (session_id as query param)
-  const session_id = url.searchParams.get('session_id');
-  if (!session_id) {
-    return new Response(JSON.stringify({ error: 'Missing session_id' }), { status: 400 });
-  }
-  const result = await db.tracestack_list_entries(platform, session_id);
-  if (result.error) {
-    return new Response(JSON.stringify({ error: result.message }), { status: 500 });
-  }
-  return new Response(JSON.stringify(result.entries), { status: 200 });
-};
-
-export const POST = async ({ request, platform }) => {
-  // Create entry for a session
-  const data = await request.json();
-  data.created_by = DEMO_USER_EMAIL;
-  const result = await db.tracestack_create_entry(platform, data);
-  if (result.error) {
-    return new Response(JSON.stringify({ error: result.message }), { status: 500 });
-  }
-  return new Response(JSON.stringify({ id: result.id }), { status: 201 });
 };
