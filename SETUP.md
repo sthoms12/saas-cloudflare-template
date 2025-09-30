@@ -1,0 +1,125 @@
+# SaaS Cloudflare Template: Complete Setup Instructions
+
+> This guide covers all required setup for Cloudflare services and third-party integrations (Stripe, Resend, Turnstile, etc.) to deploy and run your SaaS app.
+
+---
+
+## 1. Cloudflare Services Setup
+
+### 1.1. Cloudflare D1 (Database)
+- Create a new Cloudflare D1 database (e.g., `example_db`) via the Cloudflare dashboard or Wrangler CLI:
+  ```sh
+  npx wrangler d1 create example_db
+  npx wrangler d1 execute example_db --remote --file=./db_schema/schema.sql
+  ```
+- Bind the D1 database in your `wrangler.toml`:
+  ```toml
+  [[d1_databases]]
+  binding = "DB"
+  database_name = "example_db"
+  database_id = "<your-d1-database-id>"
+  ```
+
+### 1.2. Cloudflare KV Namespaces
+- Create two KV namespaces:
+  - `login_session_cache` (for session management)
+  - `rate_limit` (for rate limiting)
+- Bind them in `wrangler.toml`:
+  ```toml
+  [[kv_namespaces]]
+  binding = "LOGIN_SESSION_CACHE"
+  id = "<your-login-session-cache-id>"
+
+  [[kv_namespaces]]
+  binding = "RATE_LIMIT"
+  id = "<your-rate-limit-id>"
+  ```
+
+### 1.3. (Optional) Cloudflare R2 and Queues for Error Logging
+- If you want error logging (not zero-cost):
+  - Create an R2 bucket: `error-bucket`
+  - Create a Queue: `error-queue`
+  - Deploy the worker in `/workers/error_logger`:
+    ```sh
+    cd workers/error_logger
+    npx wrangler deploy
+    ```
+  - Bind R2 and Queue in `wrangler.toml` as needed.
+- For zero-cost, set `ENABLE_ERROR_LOGGING = false` in `src/config.js` (already done).
+
+---
+
+## 2. Environment Variables
+
+Set these in your Cloudflare dashboard (production) and `.dev.vars` (local):
+
+| Variable                | Purpose                        |
+|-------------------------|--------------------------------|
+| `LOGIN_JWT_SECRET`      | JWT signing secret             |
+| `STRIPE_SECRET_KEY`     | Stripe API key                 |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook secret          |
+| `TURNSTILE_SECRET_KEY`  | Cloudflare Turnstile secret    |
+| `RESEND_API_KEY`        | Resend email API key           |
+| `LARK_BOT_URL`          | (Optional) Lark bot webhook    |
+
+---
+
+## 3. Third-Party Integrations
+
+### 3.1. Stripe Billing
+- Create a Stripe account and get your API keys.
+- Set `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` as environment variables.
+- Configure your Stripe products and plans as needed.
+
+### 3.2. Resend Email
+- Create a [Resend](https://resend.com/) account.
+- Add your domain and set up DNS records as instructed by Resend.
+- Set `RESEND_API_KEY` as an environment variable.
+
+### 3.3. Turnstile CAPTCHA
+- Add your domain to Cloudflare Turnstile.
+- Get your site key and secret key.
+- Set the site key in `src/config.js` (public) and the secret key as `TURNSTILE_SECRET_KEY` (env var).
+
+### 3.4. (Optional) Lark Bot for Error Notifications
+- Create a Lark account and bot if you want error notifications.
+- Set `LARK_BOT_URL` as an environment variable.
+
+---
+
+## 4. Security & Rate Limiting
+
+- Rate limiting is enforced per-IP and per-user using Cloudflare KV (see `src/lib/server/rate_limit.js`).
+- Security headers (CSP, X-Frame-Options, etc.) are set in `src/app.html`.
+- All sensitive routes require authentication (see `src/hooks.server.js`).
+- Input validation and method checks are enforced on all API endpoints.
+
+---
+
+## 5. Deployment
+
+1. Install dependencies:
+   ```sh
+   npm install
+   ```
+2. Build the project:
+   ```sh
+   npm run build
+   ```
+3. Deploy to Cloudflare Pages/Workers:
+   ```sh
+   npx wrangler deploy
+   ```
+
+---
+
+## 6. Additional Notes
+
+- Update `src/config.js` with your production domain, website name, and other branding.
+- For local development, use `.dev.vars` to set environment variables.
+- For production, set all secrets in the Cloudflare dashboard.
+- Review and update legal pages (privacy, terms) as needed for compliance.
+
+---
+
+**You are now ready to launch your SaaS on Cloudflare!**
