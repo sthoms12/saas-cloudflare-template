@@ -26,4 +26,4 @@ export const EMAIL_VERIFY_TOKEN_TTL = 1 * 24 * (60 * 60); // the email verificat
 export const RESET_PWD_TOKEN_TTL = 1 * 1 * (60 * 60); // the password reset token will last for 1 hour, in seconds
 export const SUBSCRIPTION_PERIOD_LEEWAY = 2 * 24 * (60 * 60) * 1000 // give 2 days leeway for subscription period end time, in milliseconds
 
-export const ENABLE_ERROR_LOGGING = true; // if true, error logs will be stored in R2 and sent to Lark group chat, check `src/lib/server/log.js` for more details
+export const ENABLE_ERROR_LOGGING = false; // Disabled for zero-cost SaaS
