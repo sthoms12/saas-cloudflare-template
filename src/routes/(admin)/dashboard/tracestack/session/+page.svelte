@@ -180,6 +180,14 @@
   $: if (sessionId) { fetchBrainstorm(); fetchHypotheses(); }
 </script>
 <h2>Session View</h2>
+<div class="max-w-3xl mx-auto flex flex-col gap-2 mb-4">
+  <div class="alert alert-info shadow-sm">
+    <span class="font-semibold">Stripe integration:</span> <span>Coming soon! Subscription and billing features will be available in a future update.</span>
+  </div>
+  <div class="alert alert-warning shadow-sm">
+    <span class="font-semibold">Turnstile integration:</span> <span>Not currently required, but will be implemented in the future for enhanced security.</span>
+  </div>
+</div>
 <div class="mb-6">
   <div class="tabs tabs-boxed w-full flex flex-wrap justify-center">
     <button class="tab" class:tab-active={tab==='timeline'} on:click={() => tab = 'timeline'}>Timeline</button>
