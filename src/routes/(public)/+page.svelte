@@ -164,78 +164,31 @@
 <div class="hero min-h-[60vh]">
   <div class="hero-content text-center py-12">
     <div class="max-w-xl">
-      <div
-        class="text-3xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-warning to-accent mb-4 md:mb-8"
-      >
+      <div class="text-3xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-warning to-accent mb-4 md:mb-8">
         Cheers! (◕‿◕)
       </div>
-
-      <div
-        class="text-4xl md:text-6xl font-bold px-2"
-        style="line-height: 1.2;"
-      >
-        The
-        <span
-          class="underline decoration-secondary decoration-4 md:decoration-[6px]"
-        >
-          fast</span
-        >,
-        <span
-          class="underline decoration-secondary decoration-4 md:decoration-[6px]"
-        >
-          serverless</span
-        >,
-        <span
-          class="underline decoration-secondary decoration-4 md:decoration-[6px]"
-        >
-          open source</span
-        >, and
-        <span
-          class="underline decoration-secondary decoration-4 md:decoration-[6px]"
-        >
-          full-stack</span
-        >
+      <div class="text-4xl md:text-6xl font-bold px-2 leading-tight">
+        The <span class="underline decoration-secondary decoration-4 md:decoration-[6px]">fast</span>,
+        <span class="underline decoration-secondary decoration-4 md:decoration-[6px]">serverless</span>,
+        <span class="underline decoration-secondary decoration-4 md:decoration-[6px]">open source</span>, and
+        <span class="underline decoration-secondary decoration-4 md:decoration-[6px]">full-stack</span>
         <span> website</span>
       </div>
-
       <div class="mt-6 md:mt-10 text-sm md:text-lg">
         Built with
-        <a href="https://kit.svelte.dev" class="link font-bold" target="_blank">
-          SvelteKit</a
-        >,
-        <a
-          href="https://tailwindcss.com"
-          class="link font-bold"
-          target="_blank"
-        >
-          Tailwind</a
-        >,
-        <a href="https://daisyui.com" class="link font-bold" target="_blank">
-          DaisyUI</a
-        >,
-        <a href="https://stripe.com" class="link font-bold" target="_blank">
-          Stripe</a
-        >
+        <a href="https://kit.svelte.dev" class="link font-bold" target="_blank">SvelteKit</a>,
+        <a href="https://tailwindcss.com" class="link font-bold" target="_blank">Tailwind</a>,
+        <a href="https://daisyui.com" class="link font-bold" target="_blank">daisyUI</a>,
+        <a href="https://stripe.com" class="link font-bold" target="_blank">Stripe</a>
         and
-        <a
-          href="https://developers.cloudflare.com/pages"
-          class="link font-bold"
-          target="_blank"
-        >
-          Cloudflare Pages</a
-        >.
+        <a href="https://developers.cloudflare.com/pages" class="link font-bold" target="_blank">Cloudflare Pages</a>.
       </div>
-
-      <div class="mt-6 md:mt-2">
+      <div class="mt-6 md:mt-2 flex flex-col md:flex-row gap-2 justify-center items-center">
         <a href="https://github.com/zcsd/sveltekit-cloudflare-template" target="_blank">
-          <button class="btn btn-primary btn-sm px-6"
-            >★ us on Github</button
-          >
+          <button class="btn btn-primary btn-sm px-6">★ us on Github</button>
         </a>
         <a href="https://github.com/zcsd/sveltekit-cloudflare-template/blob/master/README.md" target="_blank">
-          <button class="btn btn-outline btn-primary btn-sm px-6 mt-3 mx-2"
-            >Read the Docs</button
-          >
+          <button class="btn btn-outline btn-primary btn-sm px-6">Read the Docs</button>
         </a>
       </div>
     </div>
@@ -260,41 +213,20 @@
       </div>
     </div>
 
-    <div
-      class="flex gap-6 mt-12 max-w-[1064px] mx-auto place-content-center flex-wrap"
-    >
+    <div class="flex gap-6 mt-12 max-w-[1064px] mx-auto place-content-center flex-wrap">
       {#each features as feature}
-        <div class="card bg-white w-[270px] min-h-[300px] flex-none shadow-xl">
-          <div class="card-body items-center text-center p-[24px] pt-[32px]">
-            <div class="">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="50px"
-                height="50px"
-                class="mb-2 mt-1"
-                viewBox="0 0 24 24"
-                fill="none"
-              >
+        <div class="card card-compact bg-base-100 w-[270px] min-h-[300px] flex-none shadow-xl hover:shadow-2xl transition-all duration-200">
+          <div class="card-body items-center text-center p-6 pt-8">
+            <div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="50px" height="50px" class="mb-2 mt-1" viewBox="0 0 24 24" fill="none">
                 {@html feature.svg_content}
               </svg>
             </div>
-            <h2 class="card-title">
-              {feature.name}
-            </h2>
-            <p class="text-sm">
-              {feature.description}
-            </p>
+            <h2 class="card-title text-lg font-bold mb-2">{feature.name}</h2>
+            <p class="text-sm mb-4">{feature.description}</p>
             {#if feature.link}
-              <a
-                href={feature.link}
-                class="pb-4"
-                target={feature.new_page ? "_blank" : ""}
-              >
-                <button
-                  class="btn btn-xs btn-outline rounded-full btn-primary min-w-[100px]"
-                >
-                  {feature.link_text ? feature.link_text : "Try It"}
-                </button>
+              <a href={feature.link} class="pb-4" target={feature.new_page ? "_blank" : ""}>
+                <button class="btn btn-xs btn-outline btn-primary min-w-[100px]">{feature.link_text ? feature.link_text : "Try It"}</button>
               </a>
             {/if}
           </div>

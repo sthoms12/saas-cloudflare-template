@@ -180,56 +180,55 @@
   $: if (sessionId) { fetchBrainstorm(); fetchHypotheses(); }
 </script>
 <h2>Session View</h2>
-<nav style="margin-bottom:1em;">
-  <button on:click={() => tab = 'timeline'} class:active={tab==='timeline'}>Timeline</button>
-  <button on:click={() => tab = 'kanban'} class:active={tab==='kanban'}>Kanban</button>
-  <button on:click={() => tab = 'rawnotes'} class:active={tab==='rawnotes'}>RawNotes</button>
-  <button on:click={() => tab = 'brainstorm'} class:active={tab==='brainstorm'}>Brainstorm</button>
-  <button on:click={() => tab = 'hypothesis'} class:active={tab==='hypothesis'}>HypothesisTracker</button>
-  <button on:click={() => tab = 'unified'} class:active={tab==='unified'}>UnifiedView</button>
-</nav>
-<style>
-  button.active { font-weight: bold; text-decoration: underline; }
-</style>
+<div class="mb-6">
+  <div class="tabs tabs-boxed w-full flex flex-wrap justify-center">
+    <button class="tab" class:tab-active={tab==='timeline'} on:click={() => tab = 'timeline'}>Timeline</button>
+    <button class="tab" class:tab-active={tab==='kanban'} on:click={() => tab = 'kanban'}>Kanban</button>
+    <button class="tab" class:tab-active={tab==='rawnotes'} on:click={() => tab = 'rawnotes'}>RawNotes</button>
+    <button class="tab" class:tab-active={tab==='brainstorm'} on:click={() => tab = 'brainstorm'}>Brainstorm</button>
+    <button class="tab" class:tab-active={tab==='hypothesis'} on:click={() => tab = 'hypothesis'}>HypothesisTracker</button>
+    <button class="tab" class:tab-active={tab==='unified'} on:click={() => tab = 'unified'}>UnifiedView</button>
+  </div>
+</div>
 {#if tab === 'timeline'}
-  <div>
-    <h3>Timeline</h3>
+  <div class="card bg-base-100 shadow-md p-6 max-w-2xl mx-auto">
+    <h3 class="card-title mb-4">Timeline</h3>
     {#if loading}
-      <p>Loading...</p>
+      <div class="flex justify-center items-center"><span class="loading loading-spinner loading-md"></span></div>
     {:else if error}
-      <p style="color:red">{error}</p>
+      <div class="alert alert-error mb-4">{error}</div>
     {:else}
-      <ul>
+      <ul class="mb-4 space-y-2">
         {#each entries as entry}
-          <li>{entry.timestamp}: {entry.content}</li>
+          <li class="flex items-center gap-2"><span class="badge badge-outline badge-info">{entry.timestamp}</span> <span>{entry.content}</span></li>
         {/each}
       </ul>
-      <form on:submit|preventDefault={addEntry}>
-        <input bind:value={newContent} placeholder="Add timeline entry..." required />
-        <button type="submit" disabled={creating}>{creating ? 'Adding...' : 'Add Entry'}</button>
+      <form class="flex gap-2" on:submit|preventDefault={addEntry}>
+        <input class="input input-bordered flex-1" bind:value={newContent} placeholder="Add timeline entry..." required />
+        <button class="btn btn-primary" type="submit" disabled={creating}>{creating ? 'Adding...' : 'Add Entry'}</button>
       </form>
     {/if}
   </div>
 {:else if tab === 'kanban'}
-  <div>
-    <h3>Kanban</h3>
+  <div class="card bg-base-100 shadow-md p-6 max-w-4xl mx-auto">
+    <h3 class="card-title mb-4">Kanban</h3>
     {#if loading}
-      <p>Loading...</p>
+      <div class="flex justify-center items-center"><span class="loading loading-spinner loading-md"></span></div>
     {:else if error}
-      <p style="color:red">{error}</p>
+      <div class="alert alert-error mb-4">{error}</div>
     {:else}
-      <div style="display:flex;gap:2em;">
+      <div class="flex gap-6 flex-wrap">
         {#each ['to_try','in_progress','done','blocked'] as col}
-          <div style="min-width:180px;">
-            <h4 style="text-transform:capitalize">{col.replace('_',' ')}</h4>
-            <ul>
+          <div class="min-w-[180px] flex-1">
+            <h4 class="font-semibold capitalize mb-2">{col.replace('_',' ')}</h4>
+            <ul class="space-y-2">
               {#each entries.filter(e => (e.status||'to_try')===col) as entry}
-                <li style="margin-bottom:0.5em;">
+                <li class="card card-compact bg-base-200 p-3 flex flex-col gap-2">
                   <div>{entry.content}</div>
-                  <div>
+                  <div class="join">
                     {#each ['to_try','in_progress','done','blocked'] as s}
                       {#if s!==col}
-                        <button on:click={() => updateStatus(entry.id, s)}>{s.replace('_',' ')}</button>
+                        <button class="btn btn-xs btn-outline join-item" on:click={() => updateStatus(entry.id, s)}>{s.replace('_',' ')}</button>
                       {/if}
                     {/each}
                   </div>
@@ -242,39 +241,22 @@
     {/if}
   </div>
 {:else if tab === 'rawnotes'}
-  <div>
-    <h3>RawNotes</h3>
-    <form on:submit|preventDefault={addRawNote} style="margin-bottom:1em;">
-      <textarea bind:value={rawNoteContent} placeholder="Quick note..." rows="2" style="width:100%" required></textarea>
-      <button type="submit" disabled={addingRawNote}>{addingRawNote ? 'Adding...' : 'Add Note'}</button>
+  <div class="card bg-base-100 shadow-md p-6 max-w-2xl mx-auto">
+    <h3 class="card-title mb-4">RawNotes</h3>
+    <form class="mb-4 flex flex-col gap-2" on:submit|preventDefault={addRawNote}>
+      <textarea class="textarea textarea-bordered w-full" bind:value={rawNoteContent} placeholder="Quick note..." rows="2" required></textarea>
+      <button class="btn btn-primary self-end" type="submit" disabled={addingRawNote}>{addingRawNote ? 'Adding...' : 'Add Note'}</button>
       {#if rawNoteError}
-        <p style="color:red">{rawNoteError}</p>
+        <div class="alert alert-error mt-2">{rawNoteError}</div>
       {/if}
     </form>
-    <ul>
+    <ul class="space-y-2">
       {#each entries.filter(e => (e.entry_type||'note')==='note') as note}
-        <li>{note.timestamp}: {note.content}
-          <button style="margin-left:1em" on:click={() => convertNote(note.id)}>Convert to Timeline</button>
+        <li class="flex items-center gap-2"><span class="badge badge-outline badge-info">{note.timestamp}</span> <span>{note.content}</span>
+          <button class="btn btn-xs btn-outline ml-2" on:click={() => convertNote(note.id)}>Convert to Timeline</button>
         </li>
       {/each}
     </ul>
-    <!-- Convert a note to a Timeline entry (step) -->
-    <script>
-      async function convertNote(noteId) {
-        try {
-          const res = await fetch('/(admin)/dashboard/api/tracestack/entries', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: noteId, entry_type: 'step', status: 'to_try' })
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || 'Failed to convert note');
-          await fetchEntries();
-        } catch (e) {
-          alert(e.message);
-        }
-      }
-    </script>
   </div>
   <script>
     let rawNoteContent = '';
@@ -302,18 +284,18 @@
     }
   </script>
 {:else if tab === 'brainstorm'}
-  <div>
-    <h3>Brainstorm</h3>
-    <form on:submit|preventDefault={addBrainstorm} style="margin-bottom:1em;">
-      <input bind:value={brainstormContent} placeholder="Add brainstorm idea..." required />
-      <button type="submit" disabled={addingBrainstorm}>{addingBrainstorm ? 'Adding...' : 'Add Idea'}</button>
-      {#if brainstormError}
-        <p style="color:red">{brainstormError}</p>
-      {/if}
+  <div class="card bg-base-100 shadow-md p-6 max-w-2xl mx-auto">
+    <h3 class="card-title mb-4">Brainstorm</h3>
+    <form class="mb-4 flex gap-2" on:submit|preventDefault={addBrainstorm}>
+      <input class="input input-bordered flex-1" bind:value={brainstormContent} placeholder="Add brainstorm idea..." required />
+      <button class="btn btn-primary" type="submit" disabled={addingBrainstorm}>{addingBrainstorm ? 'Adding...' : 'Add Idea'}</button>
     </form>
-    <ul>
+    {#if brainstormError}
+      <div class="alert alert-error mb-2">{brainstormError}</div>
+    {/if}
+    <ul class="space-y-2">
       {#each brainstorm_items as item}
-        <li>{item.created_date}: {item.content} <span style="font-size:0.9em;color:#888">[{item.category}]</span></li>
+        <li class="flex items-center gap-2"><span class="badge badge-outline badge-info">{item.created_date}</span> <span>{item.content}</span> <span class="badge badge-ghost badge-sm">[{item.category}]</span></li>
       {/each}
     </ul>
   </div>
@@ -356,23 +338,23 @@
     $: if (sessionId) { fetchBrainstorm(); }
   </script>
 {:else if tab === 'hypothesis'}
-  <div>
-    <h3>HypothesisTracker</h3>
-    <form on:submit|preventDefault={addHypothesis} style="margin-bottom:1em;">
-      <input bind:value={hypothesisDescription} placeholder="Describe hypothesis..." required />
-      <select bind:value={hypothesisConfidence}>
+  <div class="card bg-base-100 shadow-md p-6 max-w-2xl mx-auto">
+    <h3 class="card-title mb-4">HypothesisTracker</h3>
+    <form class="mb-4 flex flex-col md:flex-row gap-2" on:submit|preventDefault={addHypothesis}>
+      <input class="input input-bordered flex-1" bind:value={hypothesisDescription} placeholder="Describe hypothesis..." required />
+      <select class="select select-bordered" bind:value={hypothesisConfidence}>
         <option value="low">Low</option>
         <option value="medium">Medium</option>
         <option value="high">High</option>
       </select>
-      <button type="submit" disabled={addingHypothesis}>{addingHypothesis ? 'Adding...' : 'Add Hypothesis'}</button>
-      {#if hypothesisError}
-        <p style="color:red">{hypothesisError}</p>
-      {/if}
+      <button class="btn btn-primary" type="submit" disabled={addingHypothesis}>{addingHypothesis ? 'Adding...' : 'Add Hypothesis'}</button>
     </form>
-    <ul>
+    {#if hypothesisError}
+      <div class="alert alert-error mb-2">{hypothesisError}</div>
+    {/if}
+    <ul class="space-y-2">
       {#each hypothesis as h}
-        <li>{h.created_date}: {h.description} <span style="font-size:0.9em;color:#888">[{h.confidence}]</span></li>
+        <li class="flex items-center gap-2"><span class="badge badge-outline badge-info">{h.created_date}</span> <span>{h.description}</span> <span class="badge badge-ghost badge-sm">[{h.confidence}]</span></li>
       {/each}
     </ul>
   </div>
@@ -417,40 +399,61 @@
     $: if (sessionId) { fetchHypotheses(); }
   </script>
 {:else if tab === 'unified'}
-  <div>
-    <h3>UnifiedView</h3>
-    <div style="margin-bottom:1em;">
+  <div class="card bg-base-100 shadow-md p-6 max-w-4xl mx-auto">
+    <h3 class="card-title mb-4">UnifiedView</h3>
+    <div class="mb-6">
       <strong>Quick Stats:</strong>
-      <ul>
-        <li>Total Timeline Entries: {entries.length}</li>
-        <li>Kanban (To Try): {entries.filter(e => (e.status||'to_try')==='to_try').length}</li>
-        <li>Kanban (In Progress): {entries.filter(e => e.status==='in_progress').length}</li>
-        <li>Kanban (Done): {entries.filter(e => e.status==='done').length}</li>
-        <li>Kanban (Blocked): {entries.filter(e => e.status==='blocked').length}</li>
-        <li>Brainstorm Ideas: {brainstorm_items.length}</li>
-        <li>Hypotheses: {hypothesis.length}</li>
-      </ul>
+      <div class="stats stats-vertical md:stats-horizontal shadow">
+        <div class="stat">
+          <div class="stat-title">Timeline Entries</div>
+          <div class="stat-value">{entries.length}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-title">Kanban (To Try)</div>
+          <div class="stat-value">{entries.filter(e => (e.status||'to_try')==='to_try').length}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-title">Kanban (In Progress)</div>
+          <div class="stat-value">{entries.filter(e => e.status==='in_progress').length}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-title">Kanban (Done)</div>
+          <div class="stat-value">{entries.filter(e => e.status==='done').length}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-title">Kanban (Blocked)</div>
+          <div class="stat-value">{entries.filter(e => e.status==='blocked').length}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-title">Brainstorm Ideas</div>
+          <div class="stat-value">{brainstorm_items.length}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-title">Hypotheses</div>
+          <div class="stat-value">{hypothesis.length}</div>
+        </div>
+      </div>
     </div>
-    <div style="display:flex;gap:2em;">
-      <div style="flex:1;">
-        <h4>Timeline</h4>
-        <ul>
+    <div class="flex flex-col md:flex-row gap-8">
+      <div class="flex-1">
+        <h4 class="font-semibold mb-2">Timeline</h4>
+        <ul class="space-y-2">
           {#each entries as entry}
-            <li>{entry.timestamp}: {entry.content} <span style="font-size:0.9em;color:#888">[{entry.status}]</span></li>
+            <li class="flex items-center gap-2"><span class="badge badge-outline badge-info">{entry.timestamp}</span> <span>{entry.content}</span> <span class="badge badge-ghost badge-sm">[{entry.status}]</span></li>
           {/each}
         </ul>
       </div>
-      <div style="flex:1;">
-        <h4>Brainstorm</h4>
-        <ul>
+      <div class="flex-1">
+        <h4 class="font-semibold mb-2">Brainstorm</h4>
+        <ul class="space-y-2">
           {#each brainstorm_items as item}
-            <li>{item.created_date}: {item.content} <span style="font-size:0.9em;color:#888">[{item.category}]</span></li>
+            <li class="flex items-center gap-2"><span class="badge badge-outline badge-info">{item.created_date}</span> <span>{item.content}</span> <span class="badge badge-ghost badge-sm">[{item.category}]</span></li>
           {/each}
         </ul>
-        <h4>Hypotheses</h4>
-        <ul>
+        <h4 class="font-semibold mt-4 mb-2">Hypotheses</h4>
+        <ul class="space-y-2">
           {#each hypothesis as h}
-            <li>{h.created_date}: {h.description} <span style="font-size:0.9em;color:#888">[{h.confidence}]</span></li>
+            <li class="flex items-center gap-2"><span class="badge badge-outline badge-info">{h.created_date}</span> <span>{h.description}</span> <span class="badge badge-ghost badge-sm">[{h.confidence}]</span></li>
           {/each}
         </ul>
       </div>
