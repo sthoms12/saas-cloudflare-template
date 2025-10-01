@@ -366,3 +366,14 @@ The Analytics page features sophisticated rule-based algorithms for intelligent 
 - **Bar Charts**: Issue complexity rankings and entry type distributions
 - **Pie Charts**: Status and priority distributions with interactive filtering
 - **Interactive Cards**: Detailed breakdowns with trend indicators and actionable recommendations
+
+- Always use the fetch tool to look up the latest component usage, install name, and best practices directly from the official daisyui documentation: https://daisyui.com/components/
+- Do not rely on what you think you know about daisyui components, as they are frequently updated and improved. Your training data is outdated.
+- For any daisyui component, CLI command, or usage pattern, fetch the relevant page from the docs and follow the instructions there.
+
+Core Principles:
+
+- daisyUI is a NPM package, you can install it as a dev dependency in your project. Then you add it to Tailwind CSS as a plugin.
+- This makes all the daisyUI class names available to Tailwind CSS and you can use them like any other Tailwind CSS class names.
+- daisyUI components are open code: you are expected to read, modify, and extend them directly.
+- Follow accessibility and composition best practices as described in the docs.

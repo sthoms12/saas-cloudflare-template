@@ -107,7 +107,7 @@
   }
 
   // --- Brainstorm logic ---
-  let brainstormItems = [];
+  let brainstorm_items = [];
   let brainstormContent = '';
   let addingBrainstorm = false;
   let brainstormError = '';
@@ -116,7 +116,7 @@
     if (!sessionId) return;
     try {
       const res = await fetch(`/(admin)/dashboard/api/tracestack/brainstorm?session_id=${sessionId}`);
-      brainstormItems = res.ok ? await res.json() : [];
+      brainstorm_items = res.ok ? await res.json() : [];
     } catch {}
   }
 
@@ -141,7 +141,7 @@
   }
 
   // --- Hypothesis logic ---
-  let hypotheses = [];
+  let hypothesis = [];
   let hypothesisDescription = '';
   let hypothesisConfidence = 'medium';
   let addingHypothesis = false;
@@ -151,7 +151,7 @@
     if (!sessionId) return;
     try {
       const res = await fetch(`/(admin)/dashboard/api/tracestack/hypothesis?session_id=${sessionId}`);
-      hypotheses = res.ok ? await res.json() : [];
+      hypothesis = res.ok ? await res.json() : [];
     } catch {}
   }
 
@@ -183,10 +183,10 @@
 <nav style="margin-bottom:1em;">
   <button on:click={() => tab = 'timeline'} class:active={tab==='timeline'}>Timeline</button>
   <button on:click={() => tab = 'kanban'} class:active={tab==='kanban'}>Kanban</button>
-  <button on:click={() => tab = 'rawnotes'} class:active={tab==='rawnotes'}>Raw Notes</button>
+  <button on:click={() => tab = 'rawnotes'} class:active={tab==='rawnotes'}>RawNotes</button>
   <button on:click={() => tab = 'brainstorm'} class:active={tab==='brainstorm'}>Brainstorm</button>
-  <button on:click={() => tab = 'hypothesis'} class:active={tab==='hypothesis'}>Hypothesis Tracker</button>
-  <button on:click={() => tab = 'unified'} class:active={tab==='unified'}>Unified View</button>
+  <button on:click={() => tab = 'hypothesis'} class:active={tab==='hypothesis'}>HypothesisTracker</button>
+  <button on:click={() => tab = 'unified'} class:active={tab==='unified'}>UnifiedView</button>
 </nav>
 <style>
   button.active { font-weight: bold; text-decoration: underline; }
@@ -243,7 +243,7 @@
   </div>
 {:else if tab === 'rawnotes'}
   <div>
-    <h3>Raw Notes</h3>
+    <h3>RawNotes</h3>
     <form on:submit|preventDefault={addRawNote} style="margin-bottom:1em;">
       <textarea bind:value={rawNoteContent} placeholder="Quick note..." rows="2" style="width:100%" required></textarea>
       <button type="submit" disabled={addingRawNote}>{addingRawNote ? 'Adding...' : 'Add Note'}</button>
@@ -312,14 +312,14 @@
       {/if}
     </form>
     <ul>
-      {#each brainstormItems as item}
+      {#each brainstorm_items as item}
         <li>{item.created_date}: {item.content} <span style="font-size:0.9em;color:#888">[{item.category}]</span></li>
       {/each}
     </ul>
   </div>
   <script>
     // --- Brainstorm logic ---
-    let brainstormItems = [];
+    let brainstorm_items = [];
     let brainstormContent = '';
     let addingBrainstorm = false;
     let brainstormError = '';
@@ -328,7 +328,7 @@
       if (!sessionId) return;
       try {
         const res = await fetch(`/(admin)/dashboard/api/tracestack/brainstorm?session_id=${sessionId}`);
-        brainstormItems = res.ok ? await res.json() : [];
+        brainstorm_items = res.ok ? await res.json() : [];
       } catch {}
     }
 
@@ -357,7 +357,7 @@
   </script>
 {:else if tab === 'hypothesis'}
   <div>
-    <h3>Hypothesis Tracker</h3>
+    <h3>HypothesisTracker</h3>
     <form on:submit|preventDefault={addHypothesis} style="margin-bottom:1em;">
       <input bind:value={hypothesisDescription} placeholder="Describe hypothesis..." required />
       <select bind:value={hypothesisConfidence}>
@@ -371,14 +371,14 @@
       {/if}
     </form>
     <ul>
-      {#each hypotheses as h}
+      {#each hypothesis as h}
         <li>{h.created_date}: {h.description} <span style="font-size:0.9em;color:#888">[{h.confidence}]</span></li>
       {/each}
     </ul>
   </div>
   <script>
     // --- Hypothesis logic ---
-    let hypotheses = [];
+    let hypothesis = [];
     let hypothesisDescription = '';
     let hypothesisConfidence = 'medium';
     let addingHypothesis = false;
@@ -388,7 +388,7 @@
       if (!sessionId) return;
       try {
         const res = await fetch(`/(admin)/dashboard/api/tracestack/hypothesis?session_id=${sessionId}`);
-        hypotheses = res.ok ? await res.json() : [];
+        hypothesis = res.ok ? await res.json() : [];
       } catch {}
     }
 
@@ -418,7 +418,7 @@
   </script>
 {:else if tab === 'unified'}
   <div>
-    <h3>Unified View</h3>
+    <h3>UnifiedView</h3>
     <div style="margin-bottom:1em;">
       <strong>Quick Stats:</strong>
       <ul>
@@ -427,8 +427,8 @@
         <li>Kanban (In Progress): {entries.filter(e => e.status==='in_progress').length}</li>
         <li>Kanban (Done): {entries.filter(e => e.status==='done').length}</li>
         <li>Kanban (Blocked): {entries.filter(e => e.status==='blocked').length}</li>
-        <li>Brainstorm Ideas: {brainstormItems.length}</li>
-        <li>Hypotheses: {hypotheses.length}</li>
+        <li>Brainstorm Ideas: {brainstorm_items.length}</li>
+        <li>Hypotheses: {hypothesis.length}</li>
       </ul>
     </div>
     <div style="display:flex;gap:2em;">
@@ -443,13 +443,13 @@
       <div style="flex:1;">
         <h4>Brainstorm</h4>
         <ul>
-          {#each brainstormItems as item}
+          {#each brainstorm_items as item}
             <li>{item.created_date}: {item.content} <span style="font-size:0.9em;color:#888">[{item.category}]</span></li>
           {/each}
         </ul>
         <h4>Hypotheses</h4>
         <ul>
-          {#each hypotheses as h}
+          {#each hypothesis as h}
             <li>{h.created_date}: {h.description} <span style="font-size:0.9em;color:#888">[{h.confidence}]</span></li>
           {/each}
         </ul>
